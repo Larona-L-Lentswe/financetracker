@@ -1,5 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">financetracker</string>
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_name">Personal Finance Tracker</string>
+
+    <!-- Activity Titles -->
+    <string name="title_add_transaction">Add Transaction</string>
+    <string name="title_reports">Reports</string>
+    <string name="title_settings">Settings</string>
+
+    <!-- Main Activity -->
+    <string name="months_summary">This Month\'s Summary</string>
+    <string name="budget">Budget:</string>
+    <string name="spent">Spent:</string>
+    <string name="remaining">Remaining:</string>
+    <string name="recent_transactions">Recent Transactions</string>
+    <string name="no_transactions">No transactions yet. Add your first expense!</string>
+
+    <!-- Add Transaction Activity -->
+    <string name="amount">Amount</string>
+    <string name="description">Description</string>
+    <string name="category">Category</string>
+    <string name="date">Date</string>
+    <string name="select_date">Select Date</string>
+    <string name="pick_date">Pick Date</string>
+    <string name="recurring_transaction">Recurring Transaction</string>
+    <string name="notes">Notes (Optional)</string>
+    <string name="save_transaction">Save Transaction</string>
+    <string name="transaction_saved">Transaction saved successfully</string>
+    <string name="transaction_save_failed">Failed to save transaction</string>
+    <string name="error_saving_transaction">Error saving transaction: %1$s</string>
+    <string name="amount_required">Amount is required</string>
+    <string name="description_required">Description is required</string>
+    <string name="invalid_amount_format">Invalid amount format</string>
+
+    <!-- Reports Activity -->
+    <string name="spending_by_category">Spending by Category (%1$s - %2$s)</string>
+    <string name="this_week">This Week</string>
+    <string name="this_month">This Month</string>
+    <string name="this_year">This Year</string>
+    <string name="spending_summary">Spending Summary</string>
+    <string name="total_spent">Total Spent</string>
+    <string name="top_category">Top Category</string>
+    <string name="average_daily_spend">Average Daily Spend</string>
+    <string name="no_spending_data">No spending data available</string>
+
+    <!-- Settings Activity -->
+    <string name="budget_settings">Budget Settings</string>
+    <string name="monthly_budget">Monthly Budget</string>
+    <string name="save_budget">Save Budget</string>
+    <string name="display_settings">Display Settings</string>
+    <string name="currency">Currency</string>
+    <string name="show_budget_reminders">Show Budget Reminders</string>
+    <string name="save_all_settings">Save All Settings</string>
+    <string name="budget_saved">Budget saved: %1$s</string>
+    <string name="all_settings_saved">All settings saved</string>
+    <string name="enter_budget_amount">Please enter a budget amount</string>
+    <string name="budget_must_be_greater_than_zero">Budget must be greater than zero</string>
+
+    <!-- Menu Items -->
+    <string name="action_add_transaction">Add Transaction</string>
+    <string name="action_view_reports">View Reports</string>
+    <string name="action_settings">Settings</string>
 </resources>
