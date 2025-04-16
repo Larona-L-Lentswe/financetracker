@@ -44,6 +44,8 @@ dependencies {
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.database)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
@@ -71,6 +73,30 @@ dependencies {
     implementation(libs.lifecycle.extensions)
     implementation(libs.lifecycle.viewmodel)
     implementation(libs.lifecycle.livedata)
+
+    // Firebase Core dependencies
+    implementation(platform(libs.firebase.bom.v3223))
+    implementation(libs.google.firebase.analytics)
+    implementation(libs.google.firebase.database)
+    implementation(libs.google.firebase.auth)
+
+    // Firebase Authentication methods
+    implementation(libs.com.google.firebase.firebase.auth)
+    implementation(libs.play.services.auth) // Google Sign-In
+
+    // Firebase UI Auth (simplifies authentication flows)
+    implementation(libs.firebase.ui.auth.v802)
+
+    // Facebook Login (required by FirebaseUI)
+    implementation(libs.facebook.android.sdk)
+
+    // Phone number authentication
+    implementation(libs.com.google.firebase.firebase.auth2)
+    implementation(libs.play.services.safetynet) // For reCAPTCHA verification
+
+    // Apple Sign-In (for Android)
+    implementation(libs.play.services.auth.v2060)
+    implementation(libs.play.services.auth.api.phone)
 
     // JSON parsing
     implementation(libs.json)

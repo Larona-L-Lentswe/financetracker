@@ -11,6 +11,40 @@
         android:orientation="vertical"
         android:padding="16dp">
 
+        <!-- Transaction Type Selector (Income or Expense) -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="16dp"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="2dp">
+
+            <RadioGroup
+                android:id="@+id/radioGroupTransactionType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="8dp">
+
+                <RadioButton
+                    android:id="@+id/radioExpense"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:checked="true"
+                    android:text="Expense" />
+
+                <RadioButton
+                    android:id="@+id/radioIncome"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Income" />
+
+            </RadioGroup>
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Amount Field -->
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"

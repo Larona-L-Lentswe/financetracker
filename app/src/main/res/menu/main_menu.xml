@@ -2,18 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/action_add_transaction"
-        android:icon="@drawable/ic_add"
-        android:title="Add Transaction"
-        app:showAsAction="ifRoom" />
-    <item
-        android:id="@+id/action_view_reports"
-        android:icon="@drawable/ic_report"
-        android:title="View Reports"
-        app:showAsAction="ifRoom" />
-    <item
         android:id="@+id/action_settings"
         android:icon="@drawable/ic_settings"
         android:title="Settings"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_sync"
+        android:icon="@drawable/ic_sync"
+        android:title="Sync Now"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/action_logout"
+        android:title="Sign Out"
         app:showAsAction="never" />
 </menu>

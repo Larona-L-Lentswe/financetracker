@@ -24,21 +24,26 @@ import static android.content.Context.MODE_PRIVATE;
 public class HomeFragment extends BaseCachedFragment {
 
     private static final String TAG = "HomeFragment";
-    private static final String PREFS_NAME = "FinanceTrackerPrefs";
     private static final String CACHE_KEY = "home_fragment";
+    private static final String PREFS_NAME = "FinanceTrackerPrefs";
 
     // State keys for cache
     private static final String STATE_BUDGET = "budget";
-    private static final String STATE_SPENT = "spent";
+    private static final String STATE_INCOME = "income";
+    private static final String STATE_EXPENSES = "expenses";
     private static final String STATE_REMAINING = "remaining";
+    private static final String STATE_BALANCE = "balance";
 
-    private TextView tvBudget, tvSpent, tvRemaining;
+    // UI elements
+    private TextView tvIncome, tvExpenses, tvBudget, tvRemaining, tvNetBalance;
     private TransactionManager transactionManager;
 
     // Cached values
     private float cachedBudget = 0.0f;
-    private float cachedSpent = 0.0f;
+    private float cachedIncome = 0.0f;
+    private float cachedExpenses = 0.0f;
     private float cachedRemaining = 0.0f;
+    private float cachedNetBalance = 0.0f;
     private boolean dataLoaded = false;
 
     public HomeFragment() {
@@ -66,11 +71,13 @@ public class HomeFragment extends BaseCachedFragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         // Initialize views
+        tvIncome = view.findViewById(R.id.tvIncome);
+        tvExpenses = view.findViewById(R.id.tvExpenses);
         tvBudget = view.findViewById(R.id.tvBudget);
-        tvSpent = view.findViewById(R.id.tvSpent);
         tvRemaining = view.findViewById(R.id.tvRemaining);
+        tvNetBalance = view.findViewById(R.id.tvNetBalance);
 
-        // Handle FAB click (optional, since we now have bottom navigation)
+        // Handle FAB click
         FloatingActionButton fab = view.findViewById(R.id.fabAddTransaction);
         if (fab != null) {
             fab.setOnClickListener(v -> {
@@ -121,11 +128,15 @@ public class HomeFragment extends BaseCachedFragment {
         SharedPreferences prefs = requireActivity().getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
         cachedBudget = prefs.getFloat("monthly_budget", 0.0f);
 
-        // Calculate total spent amount
-        cachedSpent = transactionManager.calculateTotalSpent();
+        // Get income and expenses
+        cachedIncome = transactionManager.calculateTotalIncome();
+        cachedExpenses = transactionManager.calculateTotalExpenses();
 
-        // Calculate remaining amount
-        cachedRemaining = cachedBudget - cachedSpent;
+        // Calculate net balance (income - expenses)
+        cachedNetBalance = cachedIncome - cachedExpenses;
+
+        // Calculate remaining budget (budget - expenses)
+        cachedRemaining = cachedBudget - cachedExpenses;
 
         // Mark data as loaded
         dataLoaded = true;
@@ -139,9 +150,11 @@ public class HomeFragment extends BaseCachedFragment {
         NumberFormat currencyFormatter = NumberFormat.getCurrencyInstance(Locale.getDefault());
 
         // Update TextView values
+        tvIncome.setText(currencyFormatter.format(cachedIncome));
+        tvExpenses.setText(currencyFormatter.format(cachedExpenses));
         tvBudget.setText(currencyFormatter.format(cachedBudget));
-        tvSpent.setText(currencyFormatter.format(cachedSpent));
         tvRemaining.setText(currencyFormatter.format(cachedRemaining));
+        tvNetBalance.setText(currencyFormatter.format(cachedNetBalance));
 
         // Change color of remaining amount if over budget
         if (cachedRemaining < 0) {
@@ -149,14 +162,23 @@ public class HomeFragment extends BaseCachedFragment {
         } else {
             tvRemaining.setTextColor(requireContext().getColor(R.color.colorSuccess));
         }
+
+        // Change color of net balance based on positive/negative
+        if (cachedNetBalance < 0) {
+            tvNetBalance.setTextColor(requireContext().getColor(R.color.colorError));
+        } else {
+            tvNetBalance.setTextColor(requireContext().getColor(R.color.colorSuccess));
+        }
     }
 
     @Override
     protected void saveState(Bundle outState) {
         // Save our cached values to the bundle
         outState.putFloat(STATE_BUDGET, cachedBudget);
-        outState.putFloat(STATE_SPENT, cachedSpent);
+        outState.putFloat(STATE_INCOME, cachedIncome);
+        outState.putFloat(STATE_EXPENSES, cachedExpenses);
         outState.putFloat(STATE_REMAINING, cachedRemaining);
+        outState.putFloat(STATE_BALANCE, cachedNetBalance);
         outState.putBoolean("data_loaded", dataLoaded);
     }
 
@@ -164,8 +186,10 @@ public class HomeFragment extends BaseCachedFragment {
     protected void restoreState(Bundle state) {
         // Restore our cached values from the bundle
         cachedBudget = state.getFloat(STATE_BUDGET, 0.0f);
-        cachedSpent = state.getFloat(STATE_SPENT, 0.0f);
+        cachedIncome = state.getFloat(STATE_INCOME, 0.0f);
+        cachedExpenses = state.getFloat(STATE_EXPENSES, 0.0f);
         cachedRemaining = state.getFloat(STATE_REMAINING, 0.0f);
+        cachedNetBalance = state.getFloat(STATE_BALANCE, 0.0f);
         dataLoaded = state.getBoolean("data_loaded", false);
     }
 }

@@ -14,7 +14,7 @@ public class FinanceDbHelper extends SQLiteOpenHelper {
 
     // Database information
     private static final String DATABASE_NAME = "finance.db";
-    private static final int DATABASE_VERSION = 2; // Incremented version for adding cache table
+    private static final int DATABASE_VERSION = 3; // Incrementing because we're adding a column
 
     // SQL for creating the transactions table
     private static final String SQL_CREATE_TRANSACTIONS_TABLE =
@@ -25,7 +25,9 @@ public class FinanceDbHelper extends SQLiteOpenHelper {
                     TransactionEntry.COLUMN_CATEGORY_ID + " INTEGER NOT NULL," +
                     TransactionEntry.COLUMN_DATE + " INTEGER NOT NULL," +
                     TransactionEntry.COLUMN_IS_RECURRING + " INTEGER NOT NULL," +
-                    TransactionEntry.COLUMN_NOTES + " TEXT)";
+                    TransactionEntry.COLUMN_IS_INCOME + " INTEGER NOT NULL DEFAULT 0," + // Adding isIncome column
+                    TransactionEntry.COLUMN_NOTES + " TEXT," +
+                    "firebase_key TEXT)"; // Add Firebase key column
 
     // SQL for creating the cache table
     private static final String SQL_CREATE_CACHE_TABLE =
@@ -42,6 +44,11 @@ public class FinanceDbHelper extends SQLiteOpenHelper {
     // SQL for deleting the cache table
     private static final String SQL_DELETE_CACHE_TABLE =
             "DROP TABLE IF EXISTS " + CacheEntry.TABLE_NAME;
+
+    // SQL for adding the isIncome column if upgrading from earlier version
+    private static final String SQL_ADD_IS_INCOME_COLUMN =
+            "ALTER TABLE " + TransactionEntry.TABLE_NAME +
+                    " ADD COLUMN " + TransactionEntry.COLUMN_IS_INCOME + " INTEGER NOT NULL DEFAULT 0";
 
     public FinanceDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -63,7 +70,18 @@ public class FinanceDbHelper extends SQLiteOpenHelper {
             db.execSQL(SQL_CREATE_CACHE_TABLE);
         }
 
-        // For more significant changes we might use:
+        if (oldVersion < 3) {
+            // Add isIncome column if upgrading from version 2 or earlier
+            try {
+                db.execSQL(SQL_ADD_IS_INCOME_COLUMN);
+                Log.d(TAG, "onUpgrade: Added isIncome column");
+            } catch (Exception e) {
+                Log.e(TAG, "onUpgrade: Error adding isIncome column", e);
+                // If column already exists or other error, handle gracefully
+            }
+        }
+
+        // For more severe upgrades we might use:
         // db.execSQL(SQL_DELETE_TRANSACTIONS_TABLE);
         // db.execSQL(SQL_DELETE_CACHE_TABLE);
         // onCreate(db);

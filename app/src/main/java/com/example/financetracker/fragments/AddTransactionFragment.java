@@ -11,6 +11,8 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.DatePicker;
 import android.widget.EditText;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -42,8 +44,12 @@ public class AddTransactionFragment extends BaseCachedFragment {
     private static final String STATE_DATE = "date";
     private static final String STATE_RECURRING = "recurring";
     private static final String STATE_NOTES = "notes";
+    private static final String STATE_IS_INCOME = "is_income";
 
     // View elements
+    private RadioGroup radioGroupTransactionType;
+    private RadioButton radioExpense;
+    private RadioButton radioIncome;
     private EditText etAmount;
     private EditText etDescription;
     private Spinner spinnerCategory;
@@ -106,6 +112,9 @@ public class AddTransactionFragment extends BaseCachedFragment {
     }
 
     private void initViews(View view) {
+        radioGroupTransactionType = view.findViewById(R.id.radioGroupTransactionType);
+        radioExpense = view.findViewById(R.id.radioExpense);
+        radioIncome = view.findViewById(R.id.radioIncome);
         etAmount = view.findViewById(R.id.etAmount);
         etDescription = view.findViewById(R.id.etDescription);
         spinnerCategory = view.findViewById(R.id.spinnerCategory);
@@ -212,8 +221,9 @@ public class AddTransactionFragment extends BaseCachedFragment {
             Date date = selectedDate.getTime();
             boolean isRecurring = checkboxRecurring.isChecked();
             String notes = etNotes.getText().toString().trim();
+            boolean isIncome = radioIncome.isChecked(); // Get income status from radio button
 
-            // Create transaction object
+            // Create transaction object with income flag
             Transaction transaction = new Transaction(
                     0, // ID will be assigned by database
                     amount,
@@ -221,7 +231,8 @@ public class AddTransactionFragment extends BaseCachedFragment {
                     category.getId(),
                     date,
                     isRecurring,
-                    notes
+                    notes,
+                    isIncome // Pass income status to constructor
             );
 
             // Save transaction using TransactionManager
@@ -249,6 +260,7 @@ public class AddTransactionFragment extends BaseCachedFragment {
     }
 
     private void clearFormFields() {
+        radioExpense.setChecked(true); // Reset to expense
         etAmount.setText("");
         etDescription.setText("");
         spinnerCategory.setSelection(0);
@@ -267,12 +279,20 @@ public class AddTransactionFragment extends BaseCachedFragment {
         outState.putLong(STATE_DATE, selectedDate.getTimeInMillis());
         outState.putBoolean(STATE_RECURRING, checkboxRecurring.isChecked());
         outState.putString(STATE_NOTES, etNotes.getText().toString());
+        outState.putBoolean(STATE_IS_INCOME, radioIncome.isChecked()); // Save income selection
     }
 
     @Override
     protected void restoreState(Bundle state) {
         // Note: This will be called before the views are created in onCreateView
-        // So we need to store the state and apply it after views are initialized
+        if (radioGroupTransactionType != null) {
+            if (state.getBoolean(STATE_IS_INCOME, false)) {
+                radioIncome.setChecked(true);
+            } else {
+                radioExpense.setChecked(true);
+            }
+        }
+
         if (etAmount != null) {
             etAmount.setText(state.getString(STATE_AMOUNT, ""));
         }
@@ -309,6 +329,13 @@ public class AddTransactionFragment extends BaseCachedFragment {
         // Now that the views are initialized, apply the restored state again
         // This is needed because restoreState() might be called before views are created
         if (savedInstanceState != null) {
+            // Set income/expense selection
+            if (savedInstanceState.getBoolean(STATE_IS_INCOME, false)) {
+                radioIncome.setChecked(true);
+            } else {
+                radioExpense.setChecked(true);
+            }
+
             etAmount.setText(savedInstanceState.getString(STATE_AMOUNT, ""));
             etDescription.setText(savedInstanceState.getString(STATE_DESCRIPTION, ""));
             spinnerCategory.setSelection(savedInstanceState.getInt(STATE_CATEGORY_POS, 0));

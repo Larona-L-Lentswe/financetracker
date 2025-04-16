@@ -1,33 +1,43 @@
 package com.example.financetracker;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import com.example.financetracker.firebase.FirebaseAuthManager;
 import com.example.financetracker.fragments.AddTransactionFragment;
 import com.example.financetracker.fragments.HomeFragment;
 import com.example.financetracker.fragments.ViewReportFragment;
 import com.example.financetracker.utils.TransactionManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.NumberFormat;
 import java.util.Locale;
+import java.util.concurrent.ExecutionException;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements FirebaseAuthManager.AuthStateCallback {
 
     private static final String TAG = "MainActivity";
     private static final String PREFS_NAME = "FinanceTrackerPrefs";
 
     private TextView tvBudget, tvSpent, tvRemaining;
     private TransactionManager transactionManager;
+    private FirebaseAuthManager authManager;
+
+    // Menu items that should only be visible when signed in
+    private MenuItem syncMenuItem;
+    private MenuItem logoutMenuItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +49,12 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        // Initialize transaction manager
+        // Initialize managers
         transactionManager = TransactionManager.getInstance(this);
+        authManager = FirebaseAuthManager.getInstance();
+
+        // Register for auth state changes
+        authManager.addAuthStateListener(this);
 
         // Set up bottom navigation
         BottomNavigationView bottomNav = findViewById(R.id.bottomNavigationView);
@@ -79,6 +93,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.main_menu, menu);
+
+        // Get references to menu items
+        syncMenuItem = menu.findItem(R.id.action_sync);
+        logoutMenuItem = menu.findItem(R.id.action_logout);
+
+        // Update menu visibility based on login state
+        updateMenuVisibility();
+
         return true;
     }
 
@@ -88,11 +110,82 @@ public class MainActivity extends AppCompatActivity {
 
         if (id == R.id.action_settings) {
             // Launch Settings activity
-            startActivity(new android.content.Intent(MainActivity.this, SettingsActivity.class));
+            startActivity(new Intent(MainActivity.this, SettingsActivity.class));
+            return true;
+        } else if (id == R.id.action_sync) {
+            // Manually sync data with Firebase
+            syncWithFirebase();
+            return true;
+        } else if (id == R.id.action_logout) {
+            // Sign out
+            signOut();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void syncWithFirebase() {
+        if (!authManager.isUserSignedIn()) {
+            Toast.makeText(this, "You must be signed in to sync", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Toast.makeText(this, "Syncing with cloud...", Toast.LENGTH_SHORT).show();
+
+        // Force a refresh of all transactions
+        transactionManager.getAllTransactions();
+
+        Toast.makeText(this, "Sync complete", Toast.LENGTH_SHORT).show();
+    }
+
+    private void signOut() {
+        try {
+            authManager.signOut(this).get();
+
+            // Go back to login screen
+            Intent intent = new Intent(this, LoginActivity.class);
+            startActivity(intent);
+            finish();
+        } catch (ExecutionException | InterruptedException e) {
+            Log.e(TAG, "Error signing out", e);
+            Toast.makeText(this, "Error signing out: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateMenuVisibility() {
+        if (syncMenuItem == null || logoutMenuItem == null) return;
+
+        boolean isSignedIn = authManager.isUserSignedIn();
+        syncMenuItem.setVisible(isSignedIn);
+        logoutMenuItem.setVisible(isSignedIn);
+    }
+
+    @Override
+    public void onUserSignedIn(FirebaseUser user) {
+        Log.d(TAG, "User signed in: " + user.getUid());
+        updateMenuVisibility();
+    }
+
+    @Override
+    public void onUserSignedOut() {
+        Log.d(TAG, "User signed out");
+        updateMenuVisibility();
+
+        // If user is signed out unexpectedly, go back to login
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
+        finish();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // Remove auth state listener
+        authManager.removeAuthStateListener();
+
+        Log.d(TAG, "onDestroy: MainActivity destroyed");
     }
 
     // Activity Lifecycle Methods with Logging
@@ -119,11 +212,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
         Log.d(TAG, "onStop: MainActivity stopped");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy: MainActivity destroyed");
     }
 }

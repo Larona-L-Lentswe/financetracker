@@ -10,6 +10,8 @@ public class Transaction {
     private Date date;
     private boolean isRecurring;
     private String notes;
+    private String firebaseKey; // For Firebase integration
+    private boolean isIncome; // Added to track if this is income vs expense
 
     public Transaction(long id, float amount, String description, long categoryId, Date date, boolean isRecurring, String notes) {
         this.id = id;
@@ -19,6 +21,21 @@ public class Transaction {
         this.date = date;
         this.isRecurring = isRecurring;
         this.notes = notes;
+        this.firebaseKey = null; // Default to null for new local transactions
+        this.isIncome = false; // Default to expense (not income)
+    }
+
+    // Constructor that includes income flag
+    public Transaction(long id, float amount, String description, long categoryId, Date date, boolean isRecurring, String notes, boolean isIncome) {
+        this.id = id;
+        this.amount = amount;
+        this.description = description;
+        this.categoryId = categoryId;
+        this.date = date;
+        this.isRecurring = isRecurring;
+        this.notes = notes;
+        this.firebaseKey = null; // Default to null for new local transactions
+        this.isIncome = isIncome;
     }
 
     // Getters and setters
@@ -36,6 +53,11 @@ public class Transaction {
 
     public void setAmount(float amount) {
         this.amount = amount;
+    }
+
+    // Get actual amount value (positive for income, negative for expense)
+    public float getSignedAmount() {
+        return isIncome ? amount : -amount;
     }
 
     public String getDescription() {
@@ -76,5 +98,25 @@ public class Transaction {
 
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public String getFirebaseKey() {
+        return firebaseKey;
+    }
+
+    public void setFirebaseKey(String firebaseKey) {
+        this.firebaseKey = firebaseKey;
+    }
+
+    public boolean isSyncedWithFirebase() {
+        return firebaseKey != null && !firebaseKey.isEmpty();
+    }
+
+    public boolean isIncome() {
+        return isIncome;
+    }
+
+    public void setIncome(boolean income) {
+        isIncome = income;
     }
 }

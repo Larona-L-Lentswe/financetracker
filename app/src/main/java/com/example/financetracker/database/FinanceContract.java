@@ -15,6 +15,7 @@ public final class FinanceContract {
         public static final String COLUMN_CATEGORY_ID = "category_id";
         public static final String COLUMN_DATE = "date";
         public static final String COLUMN_IS_RECURRING = "is_recurring";
+        public static final String COLUMN_IS_INCOME = "is_income"; // Added isIncome column
         public static final String COLUMN_NOTES = "notes";
     }
 
